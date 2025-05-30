@@ -13,7 +13,7 @@ A real-time multiplayer life tracking app for Magic: The Gathering, built with R
 - **Real-time Sync** - All changes instantly reflected on all devices
 - **Room Codes** - Simple 6-character codes for easy joining
 - **Life Tracking** - Simple +/- buttons for life changes
-- **Commander Damage** - Track damage from each opponent
+- **Commander Damage** - Track damage from each opponent (automatically reduces life total)
 - **Game History** - Complete log of all game actions
 - **Player Customization** - Custom names with preset colors
 
@@ -99,7 +99,7 @@ npx expo start
 ### Game Controls
 - **Life Total** - Tap +/- buttons to adjust life
 - **Change Name** - Tap your player name
-- **Commander Damage** - Tap opponent's card
+- **Commander Damage** - Tap opponent's card to track damage (automatically reduces their life)
 - **📜** - View game history
 - **🔄** - Reset all life totals
 
@@ -144,6 +144,14 @@ const playerColors = [
   // ...
 ];
 ```
+
+## Troubleshooting
+
+### Connection Issues
+- Ensure your phone and computer are on the same WiFi network
+- Check that your IP address in `WS_URL` is correct
+- Try restarting the server if players can't connect
+- Visit `http://YOUR_IP:3000` in a browser to verify server is running
 
 ## Contributing
 

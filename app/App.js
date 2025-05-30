@@ -27,7 +27,7 @@ export default function App() {
   const [myPlayerId, setMyPlayerId] = useState(''); // This player's ID
   const [showLog, setShowLog] = useState(false); // Show/hide game log modal
   const [showCommanderDamage, setShowCommanderDamage] = useState(false); // Show/hide commander damage modal
-  const [selectedPlayer, setSelectedPlayer] = useState(null); // Player selected for commander damage
+  const [selectedPlayerId, setSelectedPlayerId] = useState(null); // ID of player selected for commander damage
 
   // useRef to persist WebSocket connection across re-renders
   const ws = useRef(null);
@@ -65,6 +65,7 @@ export default function App() {
 
         case 'GAME_UPDATE':
           // Game state has changed (life, names, etc.)
+          console.log('Game update received:', data.gameState);
           setGameState(data.gameState);
           break;
 
@@ -95,12 +96,12 @@ export default function App() {
     if (!connected) {
       // Not connected yet, so connect first
       connectToServer();
-      // Wait a bit for connection to establish
+      // Wait for connection to establish - increased timeout
       setTimeout(() => {
         if (ws.current && ws.current.readyState === WebSocket.OPEN) {
           ws.current.send(JSON.stringify({ type: 'CREATE_ROOM' }));
         }
-      }, 500);
+      }, 1000); // Increased from 500ms to 1000ms
     } else {
       // Already connected, just create room
       ws.current.send(JSON.stringify({ type: 'CREATE_ROOM' }));
@@ -126,7 +127,7 @@ export default function App() {
           }));
           setRoomCode(inputRoomCode.toUpperCase());
         }
-      }, 500);
+      }, 1000); // Increased from 500ms to 1000ms
     } else {
       // Already connected, just join room
       ws.current.send(JSON.stringify({
@@ -156,6 +157,7 @@ export default function App() {
 
   // Update commander damage between two players
   const updateCommanderDamage = (sourceId, targetId, damage) => {
+    console.log('Updating commander damage:', { sourceId, targetId, damage });
     ws.current.send(JSON.stringify({
       type: 'UPDATE_COMMANDER_DAMAGE',
       sourcePlayerId: sourceId,
@@ -214,13 +216,16 @@ export default function App() {
   // Find the current player's data from the game state
   const myPlayer = gameState ? gameState.players.find(p => p.id === myPlayerId) : null;
 
+  // FIXED: Add selectedPlayer definition
+  const selectedPlayer = gameState ? gameState.players.find(p => p.id === selectedPlayerId) : null;
+
   // MAIN MENU SCREEN - Shows when not in a game
   if (!gameState) {
     return (
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="light-content" />
         <View style={styles.menuContainer}>
-          <Text style={styles.title}>bigtable Life Tracker</Text>
+          <Text style={styles.title}>bigtable</Text>
 
           {/* Create new game button */}
           <TouchableOpacity style={styles.button} onPress={createRoom}>
@@ -327,7 +332,7 @@ export default function App() {
               style={[styles.playerCard, { backgroundColor: player.color }]}
               onPress={() => {
                 // Tap player to track commander damage to them
-                setSelectedPlayer(player);
+                setSelectedPlayerId(player.id);
                 setShowCommanderDamage(true);
               }}
             >
@@ -385,7 +390,7 @@ export default function App() {
                   <TouchableOpacity
                     style={styles.damageButton}
                     onPress={() => {
-                      const current = selectedPlayer.commanderDamage[myPlayer.id] || 0;
+                      const current = (selectedPlayer.commanderDamage && selectedPlayer.commanderDamage[myPlayer.id]) || 0;
                       if (current > 0) {
                         updateCommanderDamage(myPlayer.id, selectedPlayer.id, current - 1);
                       }
@@ -396,14 +401,14 @@ export default function App() {
 
                   {/* Current damage amount */}
                   <Text style={styles.damageAmount}>
-                    {selectedPlayer?.commanderDamage[myPlayer.id] || 0}
+                    {(selectedPlayer?.commanderDamage && selectedPlayer.commanderDamage[myPlayer.id]) || 0}
                   </Text>
 
                   {/* Increase damage button */}
                   <TouchableOpacity
                     style={styles.damageButton}
                     onPress={() => {
-                      const current = selectedPlayer.commanderDamage[myPlayer.id] || 0;
+                      const current = (selectedPlayer.commanderDamage && selectedPlayer.commanderDamage[myPlayer.id]) || 0;
                       updateCommanderDamage(myPlayer.id, selectedPlayer.id, current + 1);
                     }}
                   >

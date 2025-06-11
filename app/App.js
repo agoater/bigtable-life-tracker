@@ -16,7 +16,7 @@ import {
 // CHANGE THIS TO YOUR SERVER IP!
 // Find your IP using: ifconfig | grep "inet " | grep -v 127.0.0.1
 // Example: const WS_URL = 'ws://192.168.1.100:3000';
-const WS_URL = 'ws://localhost:3000';
+const WS_URL = 'ws://YOUR_IP_HERE:3000';
 
 export default function App() {
   // State variables to manage the app
